@@ -1,17 +1,24 @@
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Dashboard() {
   return (
     <>
       <Navbar />
 
-      <main className="p-10">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+      <main className="max-w-7xl mx-auto px-6 py-16 min-h-[70vh]">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Dashboard
+        </h1>
 
-        <p className="mt-3">
-          Dashboard page placeholder.
+        <p className="mt-4 text-gray-600 max-w-2xl">
+          Welcome to the GuestFlow dashboard. Here, hotel managers and
+          receptionists will be able to monitor room occupancy, manage
+          bookings, and view hotel operations from a single place.
         </p>
       </main>
+
+      <Footer />
     </>
   );
 }
