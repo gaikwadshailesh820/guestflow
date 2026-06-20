@@ -61,7 +61,7 @@ guestflow/
 Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone <https://github.com/gaikwadshailesh820/guestflow.git>
 ```
 
 Install dependencies

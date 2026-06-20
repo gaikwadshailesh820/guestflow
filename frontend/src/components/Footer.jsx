@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-8 mt-16">
+    <footer className="bg-gray-900 text-white py-8 dark:bg-slate-800 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-xl font-bold">GuestFlow</h2>
         <p className="mt-2 text-gray-400">

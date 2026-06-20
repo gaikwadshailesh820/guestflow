@@ -5,7 +5,7 @@ function RoomCard({
   status,
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
       <div className="h-44 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-6xl">
         🛏️
@@ -13,7 +13,7 @@ function RoomCard({
 
       <div className="p-6">
 
-        <h3 className="text-xl font-bold text-gray-800">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white">
           {title}
         </h3>
 

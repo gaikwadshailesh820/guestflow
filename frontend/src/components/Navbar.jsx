@@ -1,18 +1,21 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { HiBars3, HiXMark } from "react-icons/hi2";
+import { HiBars3, HiXMark, HiMoon, HiSun } from "react-icons/hi2";
+import { useTheme } from "../context/ThemeContext";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { darkMode, setDarkMode } = useTheme();
+
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-white dark:bg-slate-800 dark:bg-slate-900 shadow-md sticky top-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-blue-700"
+          className="text-2xl font-bold text-blue-700 dark:text-blue-400"
         >
           GuestFlow
         </Link>
@@ -20,30 +23,44 @@ function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
 
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="w-10 h-10 rounded-full flex items-center justify-center
+             bg-gray-100 dark:bg-slate-700
+             text-gray-700 dark:text-gray-200 dark:text-yellow-300
+             hover:scale-110 transition-all duration-300"
+          >
+            {darkMode ? (
+              <HiSun className="text-xl" />
+            ) : (
+              <HiMoon className="text-xl" />
+            )}
+          </button>
+
           <Link
             to="/"
-            className="text-gray-700 hover:text-blue-700 transition"
+            className="text-gray-700 dark:text-gray-200 dark:text-gray-200 hover:text-blue-700 transition"
           >
             Home
           </Link>
 
           <Link
             to="/rooms"
-            className="text-gray-700 hover:text-blue-700 transition"
+            className="text-gray-700 dark:text-gray-200 dark:text-gray-200 hover:text-blue-700 transition"
           >
             Rooms
           </Link>
 
           <Link
             to="/dashboard"
-            className="text-gray-700 hover:text-blue-700 transition"
+            className="text-gray-700 dark:text-gray-200 dark:text-gray-200 hover:text-blue-700 transition"
           >
             Dashboard
           </Link>
 
           <Link
             to="/login"
-            className="text-gray-700 hover:text-blue-700 transition"
+            className="text-gray-700 dark:text-gray-200 dark:text-gray-200 hover:text-blue-700 transition"
           >
             Login
           </Link>
@@ -70,12 +87,12 @@ function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t bg-white">
+        <div className="md:hidden border-t bg-white dark:bg-slate-800 dark:bg-slate-900">
 
           <Link
             to="/"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-6 py-4 hover:bg-blue-50"
+            className="block px-6 py-4 text-gray-700 dark:text-gray-200 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800"
           >
             Home
           </Link>
@@ -83,7 +100,7 @@ function Navbar() {
           <Link
             to="/rooms"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-6 py-4 hover:bg-blue-50"
+            className="block px-6 py-4 text-gray-700 dark:text-gray-200 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800"
           >
             Rooms
           </Link>
@@ -91,7 +108,7 @@ function Navbar() {
           <Link
             to="/dashboard"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-6 py-4 hover:bg-blue-50"
+            className="block px-6 py-4 text-gray-700 dark:text-gray-200 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800"
           >
             Dashboard
           </Link>
@@ -99,7 +116,7 @@ function Navbar() {
           <Link
             to="/login"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-6 py-4 hover:bg-blue-50"
+            className="block px-6 py-4 text-gray-700 dark:text-gray-200 dark:text-white hover:bg-blue-50 dark:hover:bg-slate-800"
           >
             Login
           </Link>

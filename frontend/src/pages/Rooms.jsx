@@ -7,13 +7,13 @@ function Rooms() {
     <>
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-16 min-h-[70vh]">
+      <main className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
 
-        <h1 className="text-4xl font-bold text-gray-800">
+        <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
           Room Management
         </h1>
 
-        <p className="mt-4 text-gray-600 max-w-2xl">
+        <p className="mt-4 text-gray-600 dark:text-gray-300 max-w-2xl">
           View all hotel rooms, their availability, room type, and pricing.
           In future weeks, managers will be able to add, edit, and manage rooms
           from this page.
