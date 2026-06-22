@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Hero() {
   return (
     <section className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 py-20 transition-colors duration-300">
@@ -26,13 +28,13 @@ function Hero() {
 
           <div className="mt-10 flex flex-wrap justify-center lg:justify-start gap-4">
 
-            <button className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300 text-white px-7 py-3 rounded-xl font-semibold shadow-lg">
+            <Link to="/login" className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300 text-white px-7 py-3 rounded-xl font-semibold shadow-lg">
               Get Started
-            </button>
+            </Link>
 
-            <button className="border border-blue-600 text-blue-700 dark:text-blue-400 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 px-7 py-3 rounded-xl font-semibold">
+            <Link to="/rooms" className="border border-blue-600 text-blue-700 dark:text-blue-400 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 px-7 py-3 rounded-xl font-semibold">
               View Rooms
-            </button>
+            </Link>
 
           </div>
 

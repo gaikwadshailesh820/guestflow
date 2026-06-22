@@ -14,6 +14,8 @@ function Button({
   size = "md",
   disabled = false,
   onClick,
+  type = "button",
+  className = "",
 }) {
   const variants = {
     primary: "bg-blue-600 text-white hover:bg-blue-700",
@@ -30,6 +32,7 @@ function Button({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`
@@ -40,6 +43,7 @@ function Button({
         ${variants[variant]}
         ${sizes[size]}
         ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${className}
       `}
     >
       {children}

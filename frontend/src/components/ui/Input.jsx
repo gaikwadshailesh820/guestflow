@@ -16,6 +16,10 @@ function Input({
   value,
   onChange,
   error,
+  name,
+  min,
+  max,
+  required,
 }) {
   return (
     <div className="mb-5">
@@ -27,11 +31,15 @@ function Input({
 
       <input
         type={type}
+        name={name}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition
-        ${error ? "border-red-500" : "border-gray-300"}`}
+        min={min}
+        max={max}
+        required={required}
+        className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition
+        ${error ? "border-red-500" : "border-gray-300 dark:border-slate-600"}`}
       />
 
       {error && (
