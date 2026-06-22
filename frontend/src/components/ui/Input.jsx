@@ -1,12 +1,13 @@
 /**
  * Reusable Input Component
  *
- * @param {string} label
- * @param {string} type
- * @param {string} placeholder
- * @param {string} value
- * @param {function} onChange
- * @param {string} error
+ * @param {Object} props
+ * @param {string} props.value - Input value.
+ * @param {Function} props.onChange - Change handler.
+ * @param {string} [props.placeholder] - Placeholder text.
+ * @param {string} [props.type="text"] - Input type.
+ * @param {boolean} [props.disabled=false] - Disable input.
+ * @param {string} [props.className] - Additional Tailwind classes.
  */
 
 function Input({

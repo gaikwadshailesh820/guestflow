@@ -1,12 +1,11 @@
 /**
- * Loader component
+ * Reusable Loader Component
  *
- * Props:
- * - variant: "spinner" | "skeleton" (default "spinner")
- * - size: "sm" | "md" | "lg" (spinner only)
- * - rows: number of skeleton rows (skeleton only)
- * - label: optional text shown under a spinner
+ * @param {Object} props
+ * @param {string} [props.label] - Loading message.
+ * @param {"sm"|"md"|"lg"} [props.size="md"] - Loader size.
  */
+
 function Loader({ variant = "spinner", size = "md", rows = 3, label }) {
   if (variant === "skeleton") {
     return (

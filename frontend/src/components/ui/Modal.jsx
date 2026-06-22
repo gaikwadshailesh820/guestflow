@@ -1,11 +1,11 @@
 /**
  * Reusable Modal Component
  *
- * Props:
- * - isOpen: boolean
- * - onClose: function
- * - title: string
- * - children: ReactNode
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Controls modal visibility.
+ * @param {Function} props.onClose - Closes the modal.
+ * @param {React.ReactNode} props.children - Modal content.
+ * @param {string} [props.title] - Modal title.
  */
 
 import { HiXMark } from "react-icons/hi2";

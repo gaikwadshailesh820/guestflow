@@ -1,11 +1,13 @@
 /**
  * Reusable Button Component
  *
- * Props:
- * variant: primary | secondary | outline
- * size: sm | md | lg
- * disabled: boolean
- * onClick: function
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Button content.
+ * @param {"primary"|"secondary"|"outline"} [props.variant="primary"] - Button style.
+ * @param {"sm"|"md"|"lg"} [props.size="md"] - Button size.
+ * @param {boolean} [props.disabled=false] - Disables the button.
+ * @param {Function} props.onClick - Click event handler.
+ * @param {string} [props.className] - Additional Tailwind classes.
  */
 
 function Button({

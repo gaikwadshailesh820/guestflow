@@ -1,12 +1,12 @@
 /**
- * Toast notification system.
+ * Reusable Toast Component
  *
- * Usage:
- *   const toast = useToast();
- *   toast.success("Room added!");
- *   toast.error("Something went wrong");
- *   toast.info("Heads up...");
+ * @param {Object} props
+ * @param {string} props.message - Toast message.
+ * @param {"success"|"error"|"warning"|"info"} [props.type="success"] - Toast type.
+ * @param {Function} props.onClose - Close handler.
  */
+
 import { createContext, useCallback, useContext, useState } from "react";
 import { HiCheckCircle, HiExclamationCircle, HiInformationCircle, HiXMark } from "react-icons/hi2";
 
