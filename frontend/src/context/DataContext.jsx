@@ -1,89 +1,118 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { seedRooms, seedGuests, seedBookings, seedActivity } from "../data/seed";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { api } from "../api/client";
+import { useToast } from "../components/ui";
 
 const DataContext = createContext();
 
-const KEYS = {
-  rooms: "guestflow_rooms",
-  guests: "guestflow_guests",
-  bookings: "guestflow_bookings",
-  activity: "guestflow_activity",
-};
-
-function loadOrSeed(key, seed) {
-  const raw = localStorage.getItem(key);
-  if (raw) {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return seed;
-    }
-  }
-  localStorage.setItem(key, JSON.stringify(seed));
-  return seed;
-}
-
 export function DataProvider({ children }) {
-  const [rooms, setRooms] = useState(() => loadOrSeed(KEYS.rooms, seedRooms));
-  const [guests, setGuests] = useState(() => loadOrSeed(KEYS.guests, seedGuests));
-  const [bookings, setBookings] = useState(() => loadOrSeed(KEYS.bookings, seedBookings));
-  const [activity, setActivity] = useState(() => loadOrSeed(KEYS.activity, seedActivity));
+  const toast = useToast();
 
-  useEffect(() => localStorage.setItem(KEYS.rooms, JSON.stringify(rooms)), [rooms]);
-  useEffect(() => localStorage.setItem(KEYS.guests, JSON.stringify(guests)), [guests]);
-  useEffect(() => localStorage.setItem(KEYS.bookings, JSON.stringify(bookings)), [bookings]);
-  useEffect(() => localStorage.setItem(KEYS.activity, JSON.stringify(activity)), [activity]);
+  const [rooms, setRooms] = useState([]);
+  const [guests, setGuests] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [activity, setActivity] = useState([]);
 
-  function logActivity(text) {
-    setActivity((prev) => [{ id: Date.now(), text, time: "just now" }, ...prev].slice(0, 12));
-  }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refreshActivity = useCallback(async () => {
+    try {
+      setActivity(await api.get("/activity"));
+    } catch {
+      // Non-critical — activity feed silently stays stale if this fails.
+    }
+  }, []);
+
+  // ---- Initial load: replace localStorage/mock data with real API calls ----
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAll() {
+      setLoading(true);
+      try {
+        const [roomsData, guestsData, bookingsData, activityData] = await Promise.all([
+          api.get("/rooms"),
+          api.get("/guests"),
+          api.get("/bookings"),
+          api.get("/activity"),
+        ]);
+        if (cancelled) return;
+        setRooms(roomsData);
+        setGuests(guestsData);
+        setBookings(bookingsData);
+        setActivity(activityData);
+        setError(null);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err.message);
+        toast.error(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadAll();
+    return () => { cancelled = true; };
+    // toast identity is stable across renders (ToastProvider uses useCallback)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- Rooms ----
-  function addRoom(room) {
-    setRooms((prev) => [...prev, room]);
-    logActivity(`Room ${room.id} added`);
+  async function addRoom(room) {
+    const created = await api.post("/rooms", room);
+    setRooms((prev) => [...prev, created]);
+    refreshActivity();
+    return created;
   }
-  function updateRoom(id, patch) {
-    setRooms((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  async function updateRoom(id, patch) {
+    const updated = await api.put(`/rooms/${id}`, patch);
+    setRooms((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    return updated;
   }
-  function deleteRoom(id) {
+  async function deleteRoom(id) {
+    await api.delete(`/rooms/${id}`);
     setRooms((prev) => prev.filter((r) => r.id !== id));
-    logActivity(`Room ${id} removed`);
+    refreshActivity();
   }
 
   // ---- Guests ----
-  function addGuest(guest) {
-    setGuests((prev) => [...prev, guest]);
-    return guest;
+  async function addGuest(guest) {
+    const created = await api.post("/guests", guest);
+    setGuests((prev) => [...prev, created]);
+    return created;
   }
-  function updateGuest(id, patch) {
-    setGuests((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
+  async function updateGuest(id, patch) {
+    const updated = await api.put(`/guests/${id}`, patch);
+    setGuests((prev) => prev.map((g) => (g.id === id ? updated : g)));
+    return updated;
   }
-  function deleteGuest(id) {
+  async function deleteGuest(id) {
+    await api.delete(`/guests/${id}`);
     setGuests((prev) => prev.filter((g) => g.id !== id));
   }
 
   // ---- Bookings ----
-  function addBooking(booking) {
-    setBookings((prev) => [booking, ...prev]);
-    updateRoom(booking.roomId, { status: "Occupied" });
-    logActivity(`New booking ${booking.id} for ${booking.guestName}`);
+  async function addBooking(booking) {
+    const { booking: created, room: updatedRoom } = await api.post("/bookings", booking);
+    setBookings((prev) => [created, ...prev]);
+    if (updatedRoom) setRooms((prev) => prev.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)));
+    refreshActivity();
+    return created;
   }
-  function updateBookingStatus(id, status) {
-    setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
-    const booking = bookings.find((b) => b.id === id);
-    if (booking) {
-      if (status === "Checked-In") updateRoom(booking.roomId, { status: "Occupied" });
-      if (status === "Checked-Out" || status === "Cancelled") updateRoom(booking.roomId, { status: "Available" });
-      logActivity(`Booking ${id} marked ${status}`);
-    }
+  async function updateBookingStatus(id, status) {
+    const { booking: updated, room: updatedRoom } = await api.put(`/bookings/${id}`, { status });
+    setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
+    if (updatedRoom) setRooms((prev) => prev.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)));
+    refreshActivity();
+    return updated;
   }
 
   const value = {
     rooms, addRoom, updateRoom, deleteRoom,
     guests, addGuest, updateGuest, deleteGuest,
     bookings, addBooking, updateBookingStatus,
-    activity, logActivity,
+    activity,
+    loading, error,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
