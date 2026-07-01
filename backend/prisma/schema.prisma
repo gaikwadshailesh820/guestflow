@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MANAGER
+  RECEPTIONIST
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum RoomType {
+  STANDARD_SINGLE
+  DELUXE_DOUBLE
+  SUITE
+  PENTHOUSE
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum ActivityType {
+  BOOKING
+  ROOM
+  GUEST
+  PAYMENT
+  SYSTEM
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  NET_BANKING
+}
+
+model User {
+  id         String     @id @default(cuid())
+  name       String
+  email      String     @unique
+  password   String
+  role       Role
+  isActive   Boolean    @default(true)
+  activities Activity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id          String     @id @default(cuid())
+  roomNumber  String     @unique
+  type        RoomType
+  floor       Int
+  capacity    Int
+  price       Float
+  ac          Boolean
+  status      RoomStatus
+  description String?
+  imageUrl    String?
+
+  bookings        Booking[]
+  recommendations Recommendation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+}
+
+model Guest {
+  id        String  @id @default(cuid())
+  guestCode String  @unique
+  name      String
+  email     String? @unique
+  phone     String
+  address   String?
+  visits    Int     @default(0)
+
+  bookings        Booking[]
+  recommendations Recommendation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id          String @id @default(cuid())
+  bookingCode String @unique
+
+  guestId String
+  roomId  String
+
+  guest Guest @relation(fields: [guestId], references: [id])
+  room  Room  @relation(fields: [roomId], references: [id])
+
+  payment Payment?
+
+  checkIn  DateTime
+  checkOut DateTime
+
+  adults   Int @default(1)
+  children Int @default(0)
+
+  total Float
+  notes String?
+
+  status BookingStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([guestId])
+  @@index([roomId])
+}
+
+model Payment {
+  id String @id @default(cuid())
+
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  amount Float
+  method PaymentMethod
+  status PaymentStatus
+
+  transactionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  type        ActivityType
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+}
+
+model Recommendation {
+  id String @id @default(cuid())
+
+  guestId String
+  roomId  String
+
+  guest Guest @relation(fields: [guestId], references: [id])
+  room  Room  @relation(fields: [roomId], references: [id])
+
+  reason String
+  score  Float
+
+  createdAt DateTime @default(now())
+
+  @@index([guestId])
+  @@index([roomId])
+}

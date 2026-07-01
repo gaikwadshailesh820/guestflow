@@ -1,12 +1,32 @@
 const express = require("express");
-const { activity } = require("../data/store");
-const { asyncHandler } = require("../utils/asyncHandler");
-
 const router = express.Router();
 
-// GET /api/activity — recent activity feed (read-only)
-router.get("/", asyncHandler(async (req, res) => {
-  res.status(200).json(activity);
-}));
+const controller = require("../controllers/activity.controller");
+const { asyncHandler } = require("../utils/asyncHandler");
+
+router.get(
+  "/",
+  asyncHandler(controller.getActivities)
+);
+
+router.get(
+  "/:id",
+  asyncHandler(controller.getActivity)
+);
+
+router.post(
+  "/",
+  asyncHandler(controller.createActivity)
+);
+
+router.put(
+  "/:id",
+  asyncHandler(controller.updateActivity)
+);
+
+router.delete(
+  "/:id",
+  asyncHandler(controller.deleteActivity)
+);
 
 module.exports = router;
