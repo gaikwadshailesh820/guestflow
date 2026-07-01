@@ -16,24 +16,42 @@ class ApiError extends Error {
 
 async function request(path, options = {}) {
   let res;
+
   try {
     res = await fetch(`${BASE_URL}${path}`, {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       ...options,
     });
   } catch {
-    // Network failure — backend likely not running.
-    throw new ApiError("Could not reach the GuestFlow server. Is the backend running?", 0);
+    throw new ApiError(
+      "Could not reach the GuestFlow server. Is the backend running?",
+      0
+    );
   }
 
-  if (res.status === 204) return null;
+  if (res.status === 204) {
+    return null;
+  }
 
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json().catch(() => null) : null;
+  const isJson = res.headers
+    .get("content-type")
+    ?.includes("application/json");
+
+  const data = isJson
+    ? await res.json().catch(() => null)
+    : null;
 
   if (!res.ok) {
-    throw new ApiError(data?.error || `Request failed with status ${res.status}`, res.status);
+    throw new ApiError(
+      data?.message ||
+        data?.error ||
+        `Request failed with status ${res.status}`,
+      res.status
+    );
   }
+
   return data;
 }
 

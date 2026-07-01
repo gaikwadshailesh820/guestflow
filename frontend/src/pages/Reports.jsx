@@ -44,7 +44,7 @@ function Reports() {
             {Object.entries(revenueByStatus).map(([status, total]) => (
               <li key={status} className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-300">{status}</span>
-                <span className="font-semibold text-gray-800 dark:text-white">${total.toLocaleString()}</span>
+                <span className="font-semibold text-gray-800 dark:text-white">₹{total.toLocaleString()}</span>
               </li>
             ))}
           </ul>

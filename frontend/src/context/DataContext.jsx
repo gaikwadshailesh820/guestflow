@@ -93,17 +93,30 @@ export function DataProvider({ children }) {
 
   // ---- Bookings ----
   async function addBooking(booking) {
-    const { booking: created, room: updatedRoom } = await api.post("/bookings", booking);
+    const created = await api.post("/bookings", booking);
+
     setBookings((prev) => [created, ...prev]);
-    if (updatedRoom) setRooms((prev) => prev.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)));
+
+    const latestRooms = await api.get("/rooms");
+    setRooms(latestRooms);
+
     refreshActivity();
+
     return created;
   }
+
   async function updateBookingStatus(id, status) {
-    const { booking: updated, room: updatedRoom } = await api.put(`/bookings/${id}`, { status });
-    setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
-    if (updatedRoom) setRooms((prev) => prev.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)));
+    const updated = await api.put(`/bookings/${id}`, { status });
+
+    setBookings((prev) =>
+      prev.map((b) => (b.id === id ? updated : b))
+    );
+
+    const latestRooms = await api.get("/rooms");
+    setRooms(latestRooms);
+
     refreshActivity();
+
     return updated;
   }
 

@@ -33,11 +33,17 @@ exports.updateRoom = async (req, res) => {
 };
 
 exports.deleteRoom = async (req, res) => {
-  const ok = await roomService.deleteRoom(req.params.id);
+  const result = await roomService.deleteRoom(req.params.id);
 
-  if (!ok) {
+  if (!result) {
     throw httpError(404, "Room not found");
   }
 
-  res.sendStatus(204);
+  if (result.error) {
+    return res.status(409).json({
+      message: result.error,
+    });
+  }
+
+  return res.sendStatus(204);
 };

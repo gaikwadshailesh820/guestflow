@@ -63,7 +63,7 @@ function ManagerDashboard() {
             <StatCard label="Total Rooms" value={stats.total} sub="All registered rooms" />
             <StatCard label="Available" value={stats.available} sub="Ready for check-in" color="text-green-600" />
             <StatCard label="Occupied" value={stats.occupied} sub="Currently checked in" color="text-blue-600" />
-            <StatCard label="Revenue" value={`$${stats.revenue.toLocaleString()}`} sub="Total from bookings" color="text-purple-600" />
+            <StatCard label="Revenue" value={`₹${stats.revenue.toLocaleString()}`} sub="Total from bookings" color="text-purple-600" />
             <StatCard label="Occupancy Rate" value={`${stats.occupancyRate}%`} sub="Occupied / total rooms" color="text-amber-600" />
             <StatCard label="Maintenance" value={stats.maintenance} sub="Rooms under maintenance" color="text-red-600" />
           </div>

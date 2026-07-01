@@ -73,12 +73,18 @@ function Rooms() {
     }
     setFormOpen(false);
   }
-  function handleDelete(id) {
-    if (confirm(`Delete room ${id}? This can't be undone.`)) {
-      deleteRoom(id);
-      toast.info(`Room ${id} deleted.`);
-    }
+async function handleDelete(id) {
+  if (!confirm(`Delete room ${id}? This can't be undone.`)) {
+    return;
   }
+
+  try {
+    await deleteRoom(id);
+    toast.success(`Room ${id} deleted.`);
+  } catch (err) {
+    toast.error(err.message);
+  }
+}
 
   function openAssign(room) {
     setAssignRoom(room);
@@ -117,11 +123,10 @@ function Rooms() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-                statusFilter === s
-                  ? "bg-blue-600 text-white"
-                  : "bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700"
-              }`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${statusFilter === s
+                ? "bg-blue-600 text-white"
+                : "bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700"
+                }`}
             >
               {s} {counts[s]}
             </button>
@@ -151,7 +156,7 @@ function Rooms() {
                 <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{r.type}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{r.floor}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{r.capacity} guests</td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-200">${r.price}</td>
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-200">₹{Number(r.price).toLocaleString("en-IN")}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{r.ac ? "Yes" : "No"}</td>
                 <td className="py-3 px-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_STYLE[r.status]}`}>
@@ -197,7 +202,7 @@ function Rooms() {
             <Input label="Floor" type="number" min="1" value={form.floor} onChange={(e) => setForm({ ...form, floor: e.target.value })} />
             <Input label="Capacity" type="number" min="1" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
           </div>
-          <Input label="Price / Night ($)" type="number" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+          <Input label="Price / Night (₹)" type="number" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
           <label className="flex items-center gap-2 mb-5 text-gray-700 dark:text-gray-200">
             <input type="checkbox" checked={form.ac} onChange={(e) => setForm({ ...form, ac: e.target.checked })} />
             Air Conditioned
@@ -233,7 +238,7 @@ function Rooms() {
           <Input label="Number of Nights" type="number" min="1" value={nights} onChange={(e) => setNights(e.target.value)} />
           {assignRoom && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
-              Total: <span className="font-semibold text-gray-800 dark:text-white">${assignRoom.price * Number(nights || 0)}</span>
+              Total: <span className="font-semibold text-gray-800 dark:text-white">₹{(assignRoom.price * Number(nights)).toLocaleString("en-IN")}</span>
             </p>
           )}
           <div className="flex justify-end gap-3">

@@ -20,12 +20,15 @@ function Bookings() {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
-    return bookings.filter(
-      (b) =>
-        b.id.toLowerCase().includes(search.toLowerCase()) ||
-        b.guestName.toLowerCase().includes(search.toLowerCase()) ||
-        b.roomId.toLowerCase().includes(search.toLowerCase())
-    );
+    return bookings.filter((b) => {
+      if (!b) return false;
+
+      return (
+        (b.id || "").toLowerCase().includes(search.toLowerCase()) ||
+        (b.guestName || "").toLowerCase().includes(search.toLowerCase()) ||
+        String(b.roomId || "").toLowerCase().includes(search.toLowerCase())
+      );
+    });
   }, [bookings, search]);
 
   function advance(b) {
@@ -65,7 +68,7 @@ function Bookings() {
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.roomId}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.checkIn}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.checkOut}</td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-200">${b.total}</td>
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-200">₹{b.total.toLocaleString()}</td>
                 <td className="py-3 px-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_STYLE[b.status]}`}>{b.status}</span>
                 </td>

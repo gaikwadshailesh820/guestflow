@@ -126,14 +126,14 @@ function AIRecommend() {
 
       {step === 1 && (
         <form onSubmit={runAnalysis} className="bg-white dark:bg-slate-900 rounded-2xl shadow p-6 max-w-2xl">
-          <Input label="Guest Full Name" value={form.guestName} onChange={(e) => setForm({ ...form, guestName: e.target.value })} placeholder="e.g. Sara Mitchell" />
+          <Input label="Guest Full Name" value={form.guestName} onChange={(e) => setForm({ ...form, guestName: e.target.value })} placeholder="e.g. Robert Downey Jr." />
           <div className="grid grid-cols-2 gap-4">
             <Input label="Number of Guests" type="number" min="1" value={form.numGuests} onChange={(e) => setForm({ ...form, numGuests: e.target.value })} />
             <Input label="Stay Duration (nights)" type="number" min="1" value={form.nights} onChange={(e) => setForm({ ...form, nights: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Min Budget / Night ($)" type="number" min="0" value={form.minBudget} onChange={(e) => setForm({ ...form, minBudget: e.target.value })} />
-            <Input label="Max Budget / Night ($)" type="number" min="0" value={form.maxBudget} onChange={(e) => setForm({ ...form, maxBudget: e.target.value })} />
+            <Input label="Min Budget / Night (₹)" type="number" min="0" value={form.minBudget} onChange={(e) => setForm({ ...form, minBudget: e.target.value })} />
+            <Input label="Max Budget / Night (₹)" type="number" min="0" value={form.maxBudget} onChange={(e) => setForm({ ...form, maxBudget: e.target.value })} />
           </div>
           <label className="block mb-2 font-medium text-gray-700 dark:text-gray-200">AC Preference</label>
           <select value={form.ac} onChange={(e) => setForm({ ...form, ac: e.target.value })}
@@ -187,7 +187,7 @@ function AIRecommend() {
                 >
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white">Room {r.id} — {r.type}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">${r.price}/night · {r.capacity} guests · {r.ac ? "AC" : "Non-AC"} · Floor {r.floor}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">₹{Number(r.price).toLocaleString("en-IN")}/night · {r.capacity} guests · {r.ac ? "AC" : "Non-AC"} · Floor {r.floor}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-bold ${r.match >= 80 ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : r.match >= 50 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"}`}>
                     {r.match}% Match
@@ -209,7 +209,7 @@ function AIRecommend() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">Duration</p>
                 <p className="font-medium text-gray-800 dark:text-white mb-3">{form.nights} nights</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
-                <p className="font-bold text-2xl text-blue-600 mb-4">${selectedRoom.price * Number(form.nights)}</p>
+                <p className="font-bold text-2xl text-blue-600 mb-4">₹{(selectedRoom.price * Number(form.nights)).toLocaleString("en-IN")}</p>
                 <label className="block mb-2 font-medium text-gray-700 dark:text-gray-200">Payment Mode</label>
                 <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)}
                   className="w-full px-4 py-3 border rounded-xl mb-5 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100">

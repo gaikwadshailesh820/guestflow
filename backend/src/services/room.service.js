@@ -69,7 +69,19 @@ async function deleteRoom(id) {
     },
   });
 
-  if (!existing) return false;
+  if (!existing) return null;
+
+  const bookingCount = await prisma.booking.count({
+    where: {
+      roomId: existing.id,
+    },
+  });
+
+  if (bookingCount > 0) {
+    return {
+      error: "Cannot delete room because it has booking history.",
+    };
+  }
 
   await prisma.room.delete({
     where: {
@@ -77,7 +89,7 @@ async function deleteRoom(id) {
     },
   });
 
-  return true;
+  return { success: true };
 }
 
 module.exports = {

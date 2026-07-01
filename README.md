@@ -8,26 +8,30 @@ GuestFlow is a full-stack Hotel Management System that streamlines hotel operati
 
 ## Frontend
 
-* Modern responsive UI
-* Dashboard
-* Room Management
-* Guest Management
-* Booking Management
-* Activity Timeline
-* Responsive design for desktop and mobile
+- Modern Responsive UI
+- Dashboard
+- Room Management
+- Guest Management
+- Booking Management
+- Activity Timeline
+- Search Functionality
+- Responsive Design (Desktop & Mobile)
 
 ## Backend
 
-* RESTful API built with Express.js
-* CRUD operations for Rooms
-* CRUD operations for Guests
-* CRUD operations for Bookings
-* Activity API
-* Guest search endpoint
-* JSON responses with proper HTTP status codes
-* Centralized error handling middleware
-* Environment variable support
-* CORS configuration
+- RESTful API built with Express.js
+- CRUD Operations for Rooms
+- CRUD Operations for Guests
+- CRUD Operations for Bookings
+- Activity API
+- Guest Search
+- PostgreSQL Database Integration
+- Prisma ORM
+- Cloud Database (Supabase)
+- Prisma Database Seeding
+- Centralized Error Handling
+- Environment Variable Support
+- CORS Configuration
 
 ---
 
@@ -35,21 +39,67 @@ GuestFlow is a full-stack Hotel Management System that streamlines hotel operati
 
 ## Frontend
 
-* React
-* Vite
-* JavaScript
-* React Router DOM
-* Tailwind CSS
+- React
+- Vite
+- JavaScript
+- React Router DOM
+- Tailwind CSS
 
 ## Backend
 
-* Node.js
-* Express.js
-* CORS
-* dotenv
-* Nodemon
+- Node.js
+- Express.js
+- Prisma ORM
+- PostgreSQL
+- Supabase
+- CORS
+- dotenv
+- Nodemon
 
 ---
+
+# 🗄 Database
+
+GuestFlow uses **Supabase PostgreSQL** as its primary relational database.
+
+Database operations are managed using **Prisma ORM**, providing:
+
+- Type-safe database queries
+- Schema migrations
+- Database seeding
+- Relationship management
+- Easy maintenance
+
+### Why PostgreSQL?
+
+- Reliable relational database
+- ACID compliant transactions
+- Efficient relationship management
+- Cloud hosted with Supabase
+- Scalable architecture
+
+---
+
+# 📊 Database Models
+
+The application contains the following models:
+
+- User
+- Room
+- Guest
+- Booking
+- Payment
+- Activity
+- Recommendation
+
+---
+
+# 🗺 Database Schema
+
+The following Entity Relationship Diagram (ERD) illustrates the database design of **GuestFlow**. It shows the core entities, their key fields, and the relationships between them.
+
+![GuestFlow Database Schema](docs/schema.png)
+
 
 # 📁 Project Structure
 
@@ -57,11 +107,19 @@ GuestFlow is a full-stack Hotel Management System that streamlines hotel operati
 guestflow/
 │
 ├── backend/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   ├── schema.prisma
+│   │   └── seed.js
+│   │
 │   ├── src/
-│   │   ├── data/
+│   │   ├── controllers/
+│   │   ├── lib/
 │   │   ├── middleware/
 │   │   ├── routes/
+│   │   ├── services/
 │   │   └── utils/
+│   │
 │   ├── server.js
 │   ├── package.json
 │   ├── package-lock.json
@@ -100,66 +158,77 @@ cd guestflow
 
 ---
 
-# 🚀 How to Run Backend Locally
+# 🚀 Backend Setup
 
-### 1. Navigate to the backend folder
+Navigate to backend
 
 ```bash
 cd backend
 ```
 
-### 2. Install dependencies
+Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Create a `.env` file
-
-Copy the values from `.env.example`.
+Create a `.env`
 
 Example:
 
 ```env
+DATABASE_URL="YOUR_DATABASE_URL"
+
 PORT=5000
+
 CORS_ORIGIN=http://localhost:5173
 ```
 
-### 4. Start the backend server
+Run Prisma Migration
+
+```bash
+npx prisma migrate dev
+```
+
+Seed Database
+
+```bash
+npx prisma db seed
+```
+
+Start Backend
 
 ```bash
 npm run dev
 ```
 
-The backend will start on:
+Backend runs on
 
-```text
+```
 http://localhost:5000
 ```
 
-### 5. Verify the backend
+Verify backend
 
-Open:
-
-```text
+```
 http://localhost:5000/api/health
 ```
 
-Expected response:
+Expected
 
 ```json
 {
-  "status": "ok"
+  "status":"ok"
 }
 ```
 
 ---
 
-# 💻 How to Run Frontend Locally
+# 💻 Frontend Setup
 
 Open another terminal.
 
-Navigate to the frontend folder.
+Navigate to the frontend directory.
 
 ```bash
 cd frontend
@@ -173,6 +242,8 @@ npm install
 
 Create a `.env` file.
 
+Example:
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -185,7 +256,7 @@ npm run dev
 
 Frontend runs on:
 
-```text
+```
 http://localhost:5173
 ```
 
@@ -195,73 +266,101 @@ http://localhost:5173
 
 ## Rooms
 
-| Method | Endpoint         |
-| ------ | ---------------- |
-| GET    | `/api/rooms`     |
-| GET    | `/api/rooms/:id` |
-| POST   | `/api/rooms`     |
-| PUT    | `/api/rooms/:id` |
+| Method | Endpoint |
+|---------|----------|
+| GET | `/api/rooms` |
+| GET | `/api/rooms/:id` |
+| POST | `/api/rooms` |
+| PUT | `/api/rooms/:id` |
 | DELETE | `/api/rooms/:id` |
 
 ---
 
 ## Guests
 
-| Method | Endpoint                     |
-| ------ | ---------------------------- |
-| GET    | `/api/guests`                |
-| GET    | `/api/guests/:id`            |
-| POST   | `/api/guests`                |
-| PUT    | `/api/guests/:id`            |
-| DELETE | `/api/guests/:id`            |
-| GET    | `/api/guests/search?q=James` |
+| Method | Endpoint |
+|---------|----------|
+| GET | `/api/guests` |
+| GET | `/api/guests/:id` |
+| POST | `/api/guests` |
+| PUT | `/api/guests/:id` |
+| DELETE | `/api/guests/:id` |
+| GET | `/api/guests/search?q=Rahul` |
 
 ---
 
 ## Bookings
 
-| Method | Endpoint            |
-| ------ | ------------------- |
-| GET    | `/api/bookings`     |
-| POST   | `/api/bookings`     |
-| PUT    | `/api/bookings/:id` |
+| Method | Endpoint |
+|---------|----------|
+| GET | `/api/bookings` |
+| GET | `/api/bookings/:id` |
+| POST | `/api/bookings` |
+| PUT | `/api/bookings/:id` |
 | DELETE | `/api/bookings/:id` |
 
 ---
 
-## Activity
+## Activities
 
-| Method | Endpoint        |
-| ------ | --------------- |
-| GET    | `/api/activity` |
+| Method | Endpoint |
+|---------|----------|
+| GET | `/api/activity` |
 
 ---
 
 # 🧪 API Testing
 
-All backend endpoints can be tested using Postman.
+All REST APIs can be tested using **Postman**.
 
-The project includes requests for:
+The APIs are connected to a **Supabase PostgreSQL** database using **Prisma ORM**. Every request performs real database operations.
 
-* Get All Rooms
-* Get Single Room
-* Create Room
-* Update Room
-* Delete Room
-* Search Guests
+The following endpoints have been tested:
+
+- Get All Rooms
+- Get Single Room
+- Create Room
+- Update Room
+- Delete Room
+- Get All Guests
+- Search Guests
+- Create Guest
+- Update Guest
+- Delete Guest
+- Create Booking
+- Update Booking Status
+- Delete Booking
+- Get Activity Timeline
 
 ---
 
 # 🔒 Environment Variables
 
-## Backend
+## Backend (.env)
 
 ```env
+DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@YOUR_HOST:5432/YOUR_DATABASE?schema=public"
+
 PORT=5000
+
 CORS_ORIGIN=http://localhost:5173
 ```
 
-## Frontend
+---
+
+## Backend (.env.example)
+
+```env
+DATABASE_URL="YOUR_DATABASE_URL"
+
+PORT=5000
+
+CORS_ORIGIN=http://localhost:5173
+```
+
+---
+
+## Frontend (.env)
 
 ```env
 VITE_API_URL=http://localhost:5000/api
@@ -269,18 +368,65 @@ VITE_API_URL=http://localhost:5000/api
 
 ---
 
-# 🚀 Future Improvements
+## Frontend (.env.example)
 
-* MongoDB database integration
-* JWT Authentication
-* Role-based access control
-* AI-powered room recommendations
-* Dashboard analytics
-* Email notifications
-* Online payment integration
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
 ---
 
-# 👨‍💻 Author
+# 🌱 Seed Data
+
+The project includes a Prisma seed file that populates the database with sample hotel data.
+
+Seed includes:
+
+- Indian hotel rooms
+- Guests
+- Bookings
+- Activities
+
+Run:
+
+```bash
+npx prisma db seed
+```
+
+---
+
+# 📌 Current Features
+
+- Dashboard
+- Room Management
+- Guest Management
+- Booking Management
+- Activity Timeline
+- Room Status Management
+- Check-In / Check-Out
+- Booking Cancellation
+- Search Functionality
+- PostgreSQL Database Integration
+- Prisma ORM
+- Cloud Database (Supabase)
+
+---
+
+# 🚀 Future Improvements
+
+- JWT Authentication
+- Role-based Access Control
+- AI Room Recommendation
+- Payment Gateway Integration
+- Invoice Generation
+- Dashboard Analytics
+- Booking Reports
+- Email Notifications
+- Image Upload for Rooms
+- Hotel Revenue Analytics
+
+---
+
+# 👨‍💻 Developer
 
 **Shailesh Gaikwad**
