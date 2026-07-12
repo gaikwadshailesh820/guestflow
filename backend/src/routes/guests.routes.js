@@ -1,11 +1,14 @@
 const express = require("express");
-
 const router = express.Router();
 
-const controller = require("../controllers/guest.controller");
+const verifyToken = require("../middleware/auth.middleware");
 
+const controller = require("../controllers/guest.controller");
 const { asyncHandler } = require("../utils/asyncHandler");
 
+// Protect all guest routes
+router.use(verifyToken);
+  
 router.get(
   "/search",
   asyncHandler(controller.searchGuests)

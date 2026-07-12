@@ -1,8 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
+const verifyToken = require("../middleware/auth.middleware");
+
 const controller = require("../controllers/activity.controller");
 const { asyncHandler } = require("../utils/asyncHandler");
+
+// Protect all activity routes
+router.use(verifyToken);
 
 router.get(
   "/",

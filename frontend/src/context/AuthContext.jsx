@@ -2,21 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
-const USERS_KEY = "guestflow_users";
 const SESSION_KEY = "guestflow_session";
-
-function getUsers() {
-  const raw = localStorage.getItem(USERS_KEY);
-  if (raw) return JSON.parse(raw);
-  // seed two demo accounts — one per role — so the Login page's demo
-  // credentials actually work and the role split is visible immediately.
-  const seeded = [
-    { email: "admin@guestflow.com", password: "admin123", name: "Admin User", role: "manager" },
-    { email: "reception@guestflow.com", password: "reception123", name: "Reception Desk", role: "receptionist" },
-  ];
-  localStorage.setItem(USERS_KEY, JSON.stringify(seeded));
-  return seeded;
-}
 
 export const ROLES = {
   MANAGER: "manager",
@@ -24,7 +10,9 @@ export const ROLES = {
 };
 
 export function dashboardPathForRole(role) {
-  return role === ROLES.MANAGER ? "/dashboard/manager" : "/dashboard/receptionist";
+  return role === ROLES.MANAGER
+    ? "/dashboard/manager"
+    : "/dashboard/receptionist";
 }
 
 export function AuthProvider({ children }) {
@@ -34,33 +22,104 @@ export function AuthProvider({ children }) {
   });
 
   useEffect(() => {
-    if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    else localStorage.removeItem(SESSION_KEY);
+    if (user) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
   }, [user]);
 
-  function login(email, password) {
-    const users = getUsers();
-    const found = users.find((u) => u.email === email && u.password === password);
-    if (!found) return { ok: false, error: "Invalid email or password." };
-    setUser({ email: found.email, name: found.name, role: found.role || ROLES.RECEPTIONIST });
-    return { ok: true, role: found.role || ROLES.RECEPTIONIST };
-  }
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
-  function signup(name, email, password, role = ROLES.RECEPTIONIST) {
-    const users = getUsers();
-    if (users.some((u) => u.email === email)) {
-      return { ok: false, error: "An account with this email already exists." };
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: data.message || "Login failed.",
+        };
+      }
+
+      localStorage.setItem("token", data.token);
+
+      const loggedInUser = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role.toLowerCase(),
+      };
+
+      setUser(loggedInUser);
+
+      return {
+        ok: true,
+        role: loggedInUser.role,
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        error: "Unable to connect to server.",
+      };
     }
-    const newUser = { name, email, password, role };
-    const updated = [...users, newUser];
-    localStorage.setItem(USERS_KEY, JSON.stringify(updated));
-    setUser({ email, name, role });
-    return { ok: true, role };
-  }
+  };
 
-  function logout() {
+  const signup = async (name, email, password, role = "RECEPTIONIST") => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            role,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: data.message,
+        };
+      }
+
+      return {
+        ok: true,
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        error: "Unable to connect to server.",
+      };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem(SESSION_KEY);
     setUser(null);
-  }
+  };
 
   return (
     <AuthContext.Provider
@@ -82,6 +141,10 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return ctx;
 }

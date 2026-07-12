@@ -19,20 +19,25 @@ function Login() {
   });
   const [error, setError] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
     const result =
       mode === "login"
-        ? login(form.email, form.password)
-        : signup(form.name, form.email, form.password, form.role);
+        ? await login(form.email, form.password)
+        : await signup(form.name, form.email, form.password, form.role);
 
     if (!result.ok) {
       setError(result.error);
       toast.error(result.error);
       return;
     }
-    toast.success(mode === "login" ? "Welcome back!" : "Account created!");
+
+    toast.success(
+      mode === "login" ? "Welcome back!" : "Account created!"
+    );
+
     navigate(dashboardPathForRole(result.role));
   }
 

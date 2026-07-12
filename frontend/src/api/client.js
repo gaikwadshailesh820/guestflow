@@ -15,12 +15,18 @@ class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem("token");
+
   let res;
 
   try {
     res = await fetch(`${BASE_URL}${path}`, {
       headers: {
         "Content-Type": "application/json",
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+        ...(options.headers || {}),
       },
       ...options,
     });
@@ -46,8 +52,8 @@ async function request(path, options = {}) {
   if (!res.ok) {
     throw new ApiError(
       data?.message ||
-        data?.error ||
-        `Request failed with status ${res.status}`,
+      data?.error ||
+      `Request failed with status ${res.status}`,
       res.status
     );
   }
