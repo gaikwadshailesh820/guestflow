@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import OAuthCallback from "./pages/OAuthCallback";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
 import Rooms from "./pages/Rooms";
@@ -24,6 +25,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
 
       {/* Generic /dashboard sends each role to its own dashboard */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />

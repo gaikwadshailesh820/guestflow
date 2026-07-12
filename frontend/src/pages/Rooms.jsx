@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import AppLayout from "../components/AppLayout";
 import { useData } from "../context/DataContext";
+import { useAuth } from "../context/AuthContext";
 import { Button, Input, Modal, useToast } from "../components/ui";
 
 const STATUS_STYLE = {
@@ -14,6 +15,7 @@ const emptyForm = { id: "", type: "Standard Single", floor: 1, capacity: 1, pric
 function Rooms() {
   const { rooms, addRoom, updateRoom, deleteRoom, guests, bookings, addBooking } = useData();
   const toast = useToast();
+  const { isManager } = useAuth();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -132,7 +134,7 @@ async function handleDelete(id) {
             </button>
           ))}
         </div>
-        <Button onClick={openAddForm}>+ Add Room</Button>
+        {isManager && <Button onClick={openAddForm}>+ Add Room</Button>}
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow overflow-x-auto">
@@ -164,7 +166,7 @@ async function handleDelete(id) {
                   </span>
                 </td>
                 <td className="py-3 px-4 space-x-2 whitespace-nowrap">
-                  <button onClick={() => openEditForm(r)} className="text-blue-600 hover:underline">Edit</button>
+                  {isManager && <button onClick={() => openEditForm(r)} className="text-blue-600 hover:underline">Edit</button>}
                   <button
                     onClick={() => openAssign(r)}
                     disabled={r.status !== "Available"}
@@ -172,7 +174,7 @@ async function handleDelete(id) {
                   >
                     Assign Guest
                   </button>
-                  <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:underline">Delete</button>
+                  {isManager && <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:underline">Delete</button>}
                 </td>
               </tr>
             ))}

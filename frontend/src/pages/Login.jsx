@@ -38,6 +38,11 @@ function Login() {
       mode === "login" ? "Welcome back!" : "Account created!"
     );
 
+    if (mode === "signup") {
+      setMode("login");
+      return;
+    }
+
     navigate(dashboardPathForRole(result.role));
   }
 
@@ -47,6 +52,11 @@ function Login() {
     } else {
       setForm({ ...form, email: "reception@guestflow.com", password: "reception123" });
     }
+  }
+
+  function loginWithGoogle() {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    window.location.assign(`${apiUrl}/auth/google`);
   }
 
   return (
@@ -95,6 +105,12 @@ function Login() {
 
             <Button type="submit" className="w-full">{mode === "login" ? "Sign In" : "Create Account"}</Button>
           </form>
+
+          {mode === "login" && (
+            <Button variant="outline" className="w-full mt-3" onClick={loginWithGoogle}>
+              Continue with Google
+            </Button>
+          )}
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-6">
             {mode === "login" ? "Don't have an account? " : "Already have an account? "}

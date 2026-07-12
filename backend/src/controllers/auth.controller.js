@@ -61,6 +61,12 @@ const login = async (req, res, next) => {
       });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({
+        message: "This account has been disabled.",
+      });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
@@ -102,8 +108,27 @@ const logout = async (req, res) => {
   });
 };
 
+const googleCallback = (req, res) => {
+  const user = req.user;
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+  const params = new URLSearchParams({
+    token,
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role.toLowerCase(),
+  });
+
+  res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/oauth/callback?${params}`);
+};
+
 module.exports = {
   register,
   login,
   logout,
+  googleCallback,
 };

@@ -18,7 +18,8 @@ export function dashboardPathForRole(role) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const token = localStorage.getItem("token");
+    return raw && token ? JSON.parse(raw) : null;
   });
 
   useEffect(() => {
@@ -90,7 +91,7 @@ export function AuthProvider({ children }) {
             name,
             email,
             password,
-            role,
+            role: role.toUpperCase(),
           }),
         }
       );
@@ -117,7 +118,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem("guestflow_session");
     setUser(null);
   };
 

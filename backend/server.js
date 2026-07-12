@@ -5,6 +5,7 @@ const activityRoutes = require("./src/routes/activity.routes");
 const authRoutes = require("./src/routes/auth.routes");
 
 require("dotenv").config();
+const passport = require("./src/config/passport");
 const express = require("express");
 const cors = require("cors");
 
@@ -30,6 +31,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(passport.initialize());
 
 // Tiny request logger — helps when demoing/screenshotting the Network tab.
 app.use((req, res, next) => {
