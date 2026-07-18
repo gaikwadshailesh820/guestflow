@@ -48,12 +48,15 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+// FIX: 
 app.use("/api/ai", aiRoutes);
+
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/guests", guestsRoutes);
 app.use("/api/bookings", bookingsRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/auth", authRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 

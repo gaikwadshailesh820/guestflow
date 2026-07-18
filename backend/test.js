@@ -1,17 +1,20 @@
 require("dotenv").config();
-const { GoogleGenAI } = require("@google/genai");
+const { InferenceClient } = require("@huggingface/inference");
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const client = new InferenceClient(process.env.HF_API_KEY);
 
-async function main() {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: "Hi",
-  });
+async function test() {
+    try {
+        const res = await client.textGeneration({
+            model: "Qwen/Qwen3-0.6B",
+            inputs: "Say Hello",
+            max_new_tokens: 50,
+        });
 
-  console.log(response.text);
+        console.log(res);
+    } catch (err) {
+        console.log(err);
+    }
 }
 
-main();
+test();

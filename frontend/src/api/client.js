@@ -67,11 +67,12 @@ export const api = {
   put: (path, body) => request(path, { method: "PUT", body: JSON.stringify(body) }),
   delete: (path) => request(path, { method: "DELETE" }),
 
+  // Correctly hits /api/ai/recommend-room matching backend app.use("/api/ai", aiRoutes)
   recommendRoom: (body) =>
-  request("/ai/recommend-room", {
-    method: "POST",
-    body: JSON.stringify(body),
-  }),
+    request("/ai/recommend-room", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
 
 export { ApiError };
