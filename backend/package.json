@@ -10,6 +10,8 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@google/genai": "^2.12.0",
+    "@huggingface/inference": "^4.13.23",
     "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

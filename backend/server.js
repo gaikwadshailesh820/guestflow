@@ -3,6 +3,7 @@ const guestsRoutes = require("./src/routes/guests.routes");
 const bookingsRoutes = require("./src/routes/bookings.routes");
 const activityRoutes = require("./src/routes/activity.routes");
 const authRoutes = require("./src/routes/auth.routes");
+const aiRoutes = require("./src/routes/ai.routes");
 
 require("dotenv").config();
 const passport = require("./src/config/passport");
@@ -47,6 +48,7 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+app.use("/api/ai", aiRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/guests", guestsRoutes);
 app.use("/api/bookings", bookingsRoutes);

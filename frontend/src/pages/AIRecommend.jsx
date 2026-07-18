@@ -2,7 +2,7 @@ import { useState } from "react";
 import AppLayout from "../components/AppLayout";
 import { useData } from "../context/DataContext";
 import { Button, Input, Loader, useToast } from "../components/ui";
-
+import { api } from "../api/client";
 /**
  * Real scoring algorithm — no fake numbers.
  * Scores every available room against the guest's stated preferences:
@@ -47,7 +47,7 @@ function AIRecommend() {
   const toast = useToast();
 
   const [step, setStep] = useState(1);
-  const [, setAnalyzing] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [form, setForm] = useState({
     guestName: "", numGuests: 2, nights: 3, minBudget: 80, maxBudget: 200,
     ac: "No Preference", roomType: "Any", notes: "",
@@ -56,15 +56,35 @@ function AIRecommend() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [paymentMode, setPaymentMode] = useState("Card");
 
-  function runAnalysis(e) {
+  async function runAnalysis(e) {
     e.preventDefault();
+
     if (!form.guestName.trim()) {
       toast.error("Guest name is required.");
       return;
     }
+
     setAnalyzing(true);
     setStep(2);
-    setTimeout(() => {
+
+    try {
+
+      const availableRooms = rooms.filter(
+        (room) => room.status === "Available"
+      );
+
+      const response = await api.recommendRoom({
+        guestName: form.guestName,
+        numGuests: Number(form.numGuests),
+        minBudget: Number(form.minBudget),
+        maxBudget: Number(form.maxBudget),
+        ac: form.ac,
+        roomType: form.roomType,
+        availableRooms,
+      });
+
+      const aiText = response.recommendation;
+
       const prefs = {
         minBudget: Number(form.minBudget),
         maxBudget: Number(form.maxBudget),
@@ -72,15 +92,36 @@ function AIRecommend() {
         ac: form.ac,
         roomType: form.roomType,
       };
-      const scored = rooms
-        .filter((r) => r.status === "Available")
-        .map((r) => ({ ...r, match: scoreRoom(r, prefs) }))
+
+      const scoredRooms = availableRooms
+        .map((room) => ({
+          ...room,
+          match: scoreRoom(room, prefs),
+        }))
         .sort((a, b) => b.match - a.match);
-      setResults(scored);
-      setSelectedRoom(scored[0] || null);
-      setAnalyzing(false);
+
+      const matchedRoom = scoredRooms.find(
+        (room) =>
+          aiText.includes(String(room.roomNumber)) ||
+          aiText.includes(String(room.id))
+      );
+
+      setResults(scoredRooms);
+
+      if (matchedRoom) {
+        setSelectedRoom(matchedRoom);
+      } else {
+        setSelectedRoom(scoredRooms[0] || null);
+      }
+
       setStep(3);
-    }, 1200); // simulated AI processing time — visible, not fake data
+
+    } catch (error) {
+      console.log(error);
+      toast.error("AI recommendation failed.");
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   function confirmBooking() {
@@ -113,9 +154,8 @@ function AIRecommend() {
       <div className="flex items-center gap-3 mb-8 flex-wrap">
         {["Guest Details", "AI Analysis", "Recommended Room"].map((label, i) => (
           <div key={label} className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-              step >= i + 1 ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-slate-700 text-gray-500"
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= i + 1 ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-slate-700 text-gray-500"
+              }`}>
               {i + 1}
             </div>
             <span className={`text-sm ${step >= i + 1 ? "text-gray-800 dark:text-white font-medium" : "text-gray-400"}`}>{label}</span>
@@ -179,11 +219,10 @@ function AIRecommend() {
                 <button
                   key={r.id}
                   onClick={() => setSelectedRoom(r)}
-                  className={`w-full text-left flex items-center justify-between gap-4 p-4 rounded-xl border transition ${
-                    selectedRoom?.id === r.id
-                      ? "border-blue-600 bg-blue-50 dark:bg-slate-800"
-                      : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800"
-                  }`}
+                  className={`w-full text-left flex items-center justify-between gap-4 p-4 rounded-xl border transition ${selectedRoom?.id === r.id
+                    ? "border-blue-600 bg-blue-50 dark:bg-slate-800"
+                    : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800"
+                    }`}
                 >
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white">Room {r.id} — {r.type}</p>
