@@ -44,7 +44,7 @@ function scoreRoom(room, prefs) {
 }
 
 function AIRecommend() {
-  const { rooms, addBooking, bookings } = useData();
+  const { rooms, addBooking } = useData();
   const toast = useToast();
 
   const [step, setStep] = useState(1);
@@ -138,85 +138,128 @@ function AIRecommend() {
       return;
     }
 
-    // 1. Resolve room identifier safely across multiple property layout variations
-    const resolvedRoomId = selectedRoom.id || selectedRoom.roomNumber;
-
-    // 2. Properly construct accurate ISO timestamps expected by backend validation
-    const checkInDateObj = new Date();
-    const checkIn = checkInDateObj.toISOString();
-
-    const checkOutDateObj = new Date();
-    checkOutDateObj.setDate(checkOutDateObj.getDate() + Number(form.nights));
-    const checkOut = checkOutDateObj.toISOString();
-
     try {
-      let finalGuestId = null;
+      // -----------------------------
+      // Generate dates
+      // -----------------------------
+      const checkIn = new Date().toISOString();
 
-      // 3. Scan local state cache to check if this guest is already registered
-      const existingBooking = bookings?.find(
-        (b) => b.guestName?.toLowerCase() === form.guestName.trim().toLowerCase() ||
-               b.guest?.name?.toLowerCase() === form.guestName.trim().toLowerCase()
+      const checkOutDate = new Date();
+      checkOutDate.setDate(
+        checkOutDate.getDate() + Number(form.nights)
       );
 
-      if (existingBooking && (existingBooking.guestId || existingBooking.guest?.id)) {
-        finalGuestId = existingBooking.guestId || existingBooking.guest?.id;
-        console.log("Found existing registered guest ID:", finalGuestId);
-      } else {
-        console.log("Registering new guest profile on the fly:", form.guestName);
-        
-        const newGuestResponse = await api.post("/guests", {
-          name: form.guestName.trim(),
-          email: `${form.guestName.trim().toLowerCase().replace(/\s+/g, "")}@guestflow.com`,
-          phone: "0000000000"
+      const checkOut = checkOutDate.toISOString();
+
+      // -----------------------------
+      // Fetch all guests
+      // -----------------------------
+      const guests = await api.get("/guests");
+
+      let guest = guests.find(
+        (g) =>
+          g.name.trim().toLowerCase() ===
+          form.guestName.trim().toLowerCase()
+      );
+
+      if (!guest) {
+        const guestCode = `G-${Date.now()}`;
+
+        await api.post("/guests", {
+          guestCode,
+          name: form.guestName,
+          email: `${guestCode}@guestflow.ai`,
+          phone: "9999999999",
+          address: "AI Recommendation Booking",
+          visits: 1,
         });
 
-        // Fixed destructuring alignment: Checks raw object fields directly returned by custom fetch client
-        finalGuestId = newGuestResponse?.id || newGuestResponse?.data?.id;
-        console.log("Successfully registered new guest profile with database ID:", finalGuestId);
+        // Fetch updated guest list after creation
+        const updatedGuests = await api.get("/guests");
+
+        guest = updatedGuests.find(
+          (g) =>
+            g.name.trim().toLowerCase() ===
+            form.guestName.trim().toLowerCase()
+        );
       }
 
-      // Checkpoint safety guard
-      if (!finalGuestId || !resolvedRoomId) {
-        toast.error("Missing required identifiers. Check backend response.");
-        return;
-      }
+      console.log("Guest Object:", guest);
 
-      // 4. Assemble the final booking payload matching requirements perfectly
+      // -----------------------------
+      // Generate booking code
+      // -----------------------------
+      const bookingCode = `B-${Date.now()}`;
+
+
+      // -----------------------------
+      // Create booking payload
+      // -----------------------------
       const bookingPayload = {
-        roomId: String(resolvedRoomId),
-        guestId: String(finalGuestId),
-        checkIn: checkIn,
-        checkOut: checkOut,
-        paymentMode: paymentMode,
-        total: Number(selectedRoom.price) * Number(form.nights)
+        bookingCode,
+
+        guestId: guest.id,
+
+        roomId: selectedRoom.id,
+
+        checkIn,
+        checkOut,
+
+        adults: Number(form.numGuests),
+        children: 0,
+
+        total:
+          Number(selectedRoom.price) *
+          Number(form.nights),
+
+        notes:
+          form.notes ||
+          "Booking created via AI Recommendation.",
+
+        status: "CONFIRMED",
       };
 
-      console.log("Sending final booking payload to backend:", bookingPayload);
+      console.log("Booking Payload:", bookingPayload);
 
-      // 5. Save the transaction instance down to your live Supabase database layer
-      const bookingResponse = await api.post("/bookings", bookingPayload);
-      const rawBackendData = bookingResponse?.data || bookingResponse;
+      // -----------------------------
+      // Create booking
+      // -----------------------------
 
-      // 6. Explicitly merge frontend layout parameters into state injection payload
-      const completeStateBooking = {
-        ...(rawBackendData || bookingResponse),
-        guestName: form.guestName.trim(), 
-        guest: { name: form.guestName.trim(), id: finalGuestId },
-        room: { id: resolvedRoomId, type: selectedRoom.type }
-      };
+      const booking = await api.post(
+        "/bookings",
+        bookingPayload
+      );
 
-      addBooking(completeStateBooking);
-      toast.success(`Success! Registered ${form.guestName} and confirmed Room ${resolvedRoomId}.`);
-      
-      // 7. Reset UI views and configuration states back to Step 1
-      setStep(1);
-      setForm({ guestName: "", numGuests: 2, nights: 3, minBudget: 80, maxBudget: 200, ac: "No Preference", roomType: "Any", notes: "" });
+      toast.success(
+        "Booking created successfully!"
+      );
+
+      // -----------------------------
+      // Reset state
+      // -----------------------------
       setResults([]);
       setSelectedRoom(null);
 
+      setForm({
+        guestName: "",
+        numGuests: 2,
+        nights: 3,
+        minBudget: 80,
+        maxBudget: 200,
+        ac: "No Preference",
+        roomType: "Any",
+        notes: "",
+      });
+
+      setStep(1);
+
     } catch (error) {
-      console.error("Automated check-in allocation failed:", error);
-      toast.error(error.message || "Failed to finalize room booking allocation.");
+      console.error(error);
+
+      toast.error(
+        error.message ||
+        "Failed to create booking."
+      );
     }
   }
 
@@ -226,8 +269,7 @@ function AIRecommend() {
       <div className="flex items-center gap-3 mb-8 flex-wrap">
         {["Guest Details", "AI Analysis", "Recommended Room"].map((label, i) => (
           <div key={label} className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= i + 1 ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-slate-700 text-gray-500"
-              }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= i + 1 ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-slate-700 text-gray-500"}`}>
               {i + 1}
             </div>
             <span className={`text-sm ${step >= i + 1 ? "text-gray-800 dark:text-white font-medium" : "text-gray-400"}`}>{label}</span>

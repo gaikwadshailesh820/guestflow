@@ -12,6 +12,7 @@ async function main() {
     // =========================
     // ROOMS
     // =========================
+    // FLOOR 1
 
     const room101 = await prisma.room.create({
         data: {
@@ -31,11 +32,13 @@ async function main() {
             type: "STANDARD_SINGLE",
             floor: 1,
             capacity: 1,
-            price: 2000,
-            ac: true,
+            price: 2200,
+            ac: false,
             status: "AVAILABLE",
         },
     });
+
+    // FLOOR 2
 
     const room201 = await prisma.room.create({
         data: {
@@ -55,11 +58,13 @@ async function main() {
             type: "DELUXE_DOUBLE",
             floor: 2,
             capacity: 2,
-            price: 3500,
+            price: 4000,
             ac: true,
             status: "OCCUPIED",
         },
     });
+
+    // FLOOR 3
 
     const room301 = await prisma.room.create({
         data: {
@@ -85,6 +90,8 @@ async function main() {
         },
     });
 
+    // FLOOR 4
+
     const room401 = await prisma.room.create({
         data: {
             roomNumber: "401",
@@ -109,14 +116,10 @@ async function main() {
         },
     });
 
-    // =========================
-    // GUESTS
-    // =========================
 
     // =========================
     // GUESTS
     // =========================
-
     const guest1 = await prisma.guest.create({
         data: {
             guestCode: "G-1001",
@@ -186,7 +189,6 @@ async function main() {
     // =========================
     // BOOKINGS
     // =========================
-
     await prisma.booking.create({
         data: {
             bookingCode: "BK-1001",
@@ -211,7 +213,7 @@ async function main() {
             checkOut: new Date("2026-07-08"),
             adults: 2,
             children: 1,
-            total: 10500,
+            total: 12000,
             notes: "Family Vacation",
             status: "CHECKED_IN",
         },
@@ -269,6 +271,11 @@ async function main() {
     await prisma.activity.createMany({
         data: [
             {
+                title: "AI Room Recommendation",
+                description: "GuestFlow AI is ready to recommend rooms based on guest preferences.",
+                type: "SYSTEM",
+            },
+            {
                 title: "Guest Checked In",
                 description: "Rahul Sharma checked into Room 101.",
                 type: "BOOKING",
@@ -304,28 +311,12 @@ async function main() {
                 type: "GUEST",
             },
             {
-                title: "Payment Received",
-                description: "₹6,000 payment received from Rahul Sharma.",
-                type: "PAYMENT",
-            },
-            {
-                title: "Payment Received",
-                description: "₹10,500 payment received from Priya Patil.",
-                type: "PAYMENT",
-            },
-            {
-                title: "Room Ready",
-                description: "Room 301 cleaned and marked available for the next guest.",
-                type: "ROOM",
-            },
-            {
                 title: "System",
-                description: "GuestFlow database initialized with sample hotel data.",
+                description: "GuestFlow database initialized successfully.",
                 type: "SYSTEM",
             },
         ],
     });
-
     console.log("✅ Database seeded successfully.");
 }
 

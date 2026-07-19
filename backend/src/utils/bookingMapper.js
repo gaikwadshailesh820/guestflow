@@ -35,11 +35,16 @@ function toDbBooking(data, guestId, roomId) {
     total: Number(data.total) || 0,
     notes: data.notes || "",
     status: {
+      CONFIRMED: BookingStatus.CONFIRMED,
+      CHECKED_IN: BookingStatus.CHECKED_IN,
+      CHECKED_OUT: BookingStatus.CHECKED_OUT,
+      CANCELLED: BookingStatus.CANCELLED,
+
       "Confirmed": BookingStatus.CONFIRMED,
       "Checked-In": BookingStatus.CHECKED_IN,
       "Checked-Out": BookingStatus.CHECKED_OUT,
-      "Cancelled": BookingStatus.CANCELLED,
-    }[data.status || "Confirmed"],
+      Cancelled: BookingStatus.CANCELLED,
+    }[data.status] || BookingStatus.CONFIRMED,
   };
 }
 
