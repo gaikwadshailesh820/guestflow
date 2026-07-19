@@ -3,6 +3,7 @@ import AppLayout from "../components/AppLayout";
 import { useData } from "../context/DataContext";
 import { Button, Input, Loader, useToast } from "../components/ui";
 import { api } from "../api/client";
+
 /**
  * Real scoring algorithm — no fake numbers.
  * Scores every available room against the guest's stated preferences:
@@ -64,15 +65,22 @@ function AIRecommend() {
       return;
     }
 
+    // 1. Filter out ONLY available rooms, handling case insensitivity
+    const availableRooms = rooms.filter(
+      (room) => room.status?.toLowerCase() === "available"
+    );
+
+    // 2. Front-end Guard: Prevent empty arrays from hitting the AI endpoint
+    if (!availableRooms || availableRooms.length === 0) {
+      toast.error("No rooms are currently available in the system for recommendations.");
+      return;
+    }
+
     setAnalyzing(true);
     setStep(2);
 
     try {
-
-      const availableRooms = rooms.filter(
-        (room) => room.status === "Available"
-      );
-
+      // 3. Send verified available rooms array to the backend AI model
       const response = await api.recommendRoom({
         guestName: form.guestName,
         numGuests: Number(form.numGuests),
@@ -93,6 +101,7 @@ function AIRecommend() {
         roomType: form.roomType,
       };
 
+      // 4. Score ONLY the available rooms so no occupied rooms show up in results
       const scoredRooms = availableRooms
         .map((room) => ({
           ...room,
@@ -115,7 +124,6 @@ function AIRecommend() {
       }
 
       setStep(3);
-
     } catch (error) {
       console.log(error);
       toast.error("AI recommendation failed.");
@@ -124,28 +132,92 @@ function AIRecommend() {
     }
   }
 
-  function confirmBooking() {
-    if (!selectedRoom) return;
-    const checkIn = new Date().toISOString().slice(0, 10);
-    const checkOutDate = new Date();
-    checkOutDate.setDate(checkOutDate.getDate() + Number(form.nights));
-    const checkOut = checkOutDate.toISOString().slice(0, 10);
-    const bookingId = `BK-${1000 + bookings.length + 1}`;
-    addBooking({
-      id: bookingId,
-      guestId: null,
-      guestName: form.guestName,
-      roomId: selectedRoom.id,
-      checkIn,
-      checkOut,
-      status: "Confirmed",
-      total: selectedRoom.price * Number(form.nights),
-    });
-    toast.success(`Booking ${bookingId} created for ${form.guestName} — Room ${selectedRoom.id}.`);
-    setStep(1);
-    setForm({ guestName: "", numGuests: 2, nights: 3, minBudget: 80, maxBudget: 200, ac: "No Preference", roomType: "Any", notes: "" });
-    setResults([]);
-    setSelectedRoom(null);
+  async function confirmBooking() {
+    if (!selectedRoom) {
+      toast.error("Please select a room first.");
+      return;
+    }
+
+    // 1. Resolve room identifier safely across multiple property layout variations
+    const resolvedRoomId = selectedRoom.id || selectedRoom.roomNumber;
+
+    // 2. Properly construct accurate ISO timestamps expected by backend validation
+    const checkInDateObj = new Date();
+    const checkIn = checkInDateObj.toISOString();
+
+    const checkOutDateObj = new Date();
+    checkOutDateObj.setDate(checkOutDateObj.getDate() + Number(form.nights));
+    const checkOut = checkOutDateObj.toISOString();
+
+    try {
+      let finalGuestId = null;
+
+      // 3. Scan local state cache to check if this guest is already registered
+      const existingBooking = bookings?.find(
+        (b) => b.guestName?.toLowerCase() === form.guestName.trim().toLowerCase() ||
+               b.guest?.name?.toLowerCase() === form.guestName.trim().toLowerCase()
+      );
+
+      if (existingBooking && (existingBooking.guestId || existingBooking.guest?.id)) {
+        finalGuestId = existingBooking.guestId || existingBooking.guest?.id;
+        console.log("Found existing registered guest ID:", finalGuestId);
+      } else {
+        console.log("Registering new guest profile on the fly:", form.guestName);
+        
+        const newGuestResponse = await api.post("/guests", {
+          name: form.guestName.trim(),
+          email: `${form.guestName.trim().toLowerCase().replace(/\s+/g, "")}@guestflow.com`,
+          phone: "0000000000"
+        });
+
+        // Fixed destructuring alignment: Checks raw object fields directly returned by custom fetch client
+        finalGuestId = newGuestResponse?.id || newGuestResponse?.data?.id;
+        console.log("Successfully registered new guest profile with database ID:", finalGuestId);
+      }
+
+      // Checkpoint safety guard
+      if (!finalGuestId || !resolvedRoomId) {
+        toast.error("Missing required identifiers. Check backend response.");
+        return;
+      }
+
+      // 4. Assemble the final booking payload matching requirements perfectly
+      const bookingPayload = {
+        roomId: String(resolvedRoomId),
+        guestId: String(finalGuestId),
+        checkIn: checkIn,
+        checkOut: checkOut,
+        paymentMode: paymentMode,
+        total: Number(selectedRoom.price) * Number(form.nights)
+      };
+
+      console.log("Sending final booking payload to backend:", bookingPayload);
+
+      // 5. Save the transaction instance down to your live Supabase database layer
+      const bookingResponse = await api.post("/bookings", bookingPayload);
+      const rawBackendData = bookingResponse?.data || bookingResponse;
+
+      // 6. Explicitly merge frontend layout parameters into state injection payload
+      const completeStateBooking = {
+        ...(rawBackendData || bookingResponse),
+        guestName: form.guestName.trim(), 
+        guest: { name: form.guestName.trim(), id: finalGuestId },
+        room: { id: resolvedRoomId, type: selectedRoom.type }
+      };
+
+      addBooking(completeStateBooking);
+      toast.success(`Success! Registered ${form.guestName} and confirmed Room ${resolvedRoomId}.`);
+      
+      // 7. Reset UI views and configuration states back to Step 1
+      setStep(1);
+      setForm({ guestName: "", numGuests: 2, nights: 3, minBudget: 80, maxBudget: 200, ac: "No Preference", roomType: "Any", notes: "" });
+      setResults([]);
+      setSelectedRoom(null);
+
+    } catch (error) {
+      console.error("Automated check-in allocation failed:", error);
+      toast.error(error.message || "Failed to finalize room booking allocation.");
+    }
   }
 
   return (
