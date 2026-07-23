@@ -66,16 +66,50 @@ function Bookings() {
                 <td className="py-3 px-4 font-medium text-gray-700 dark:text-gray-200">{b.id}</td>
                 <td className="py-3 px-4 text-gray-700 dark:text-gray-200">{b.guestName}</td>
                 <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.roomId}</td>
-                <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.checkIn}</td>
-                <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{b.checkOut}</td>
+                <td className="py-3 px-4 text-gray-500 dark:text-gray-400">
+                  {b.status === "Confirmed"
+                    ? new Date(b.checkIn).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                    : new Date(b.checkIn).toLocaleString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                </td>
+
+                <td className="py-3 px-4 text-gray-500 dark:text-gray-400">
+                  {b.status === "Confirmed"
+                    ? new Date(b.checkOut).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                    : new Date(b.checkOut).toLocaleString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                </td>
                 <td className="py-3 px-4 text-gray-700 dark:text-gray-200">₹{b.total.toLocaleString()}</td>
                 <td className="py-3 px-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_STYLE[b.status]}`}>{b.status}</span>
                 </td>
                 <td className="py-3 px-4 space-x-2 whitespace-nowrap">
                   {NEXT_STATUS[b.status] && (
-                    <button onClick={() => advance(b)} className="text-blue-600 hover:underline">
-                      Mark {NEXT_STATUS[b.status]}
+                    <button
+                      onClick={() => advance(b)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {b.status === "Confirmed"
+                        ? "Check In"
+                        : `Mark ${NEXT_STATUS[b.status]}`}
                     </button>
                   )}
                   {b.status !== "Cancelled" && b.status !== "Checked-Out" && (

@@ -75,18 +75,18 @@ function Rooms() {
     }
     setFormOpen(false);
   }
-async function handleDelete(id) {
-  if (!confirm(`Delete room ${id}? This can't be undone.`)) {
-    return;
-  }
+  async function handleDelete(id) {
+    if (!confirm(`Delete room ${id}? This can't be undone.`)) {
+      return;
+    }
 
-  try {
-    await deleteRoom(id);
-    toast.success(`Room ${id} deleted.`);
-  } catch (err) {
-    toast.error(err.message);
+    try {
+      await deleteRoom(id);
+      toast.success(`Room ${id} deleted.`);
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
-}
 
   function openAssign(room) {
     setAssignRoom(room);
@@ -110,10 +110,12 @@ async function handleDelete(id) {
       roomId: assignRoom.id,
       checkIn,
       checkOut,
-      status: "Checked-In",
+      status: "Confirmed",
       total: assignRoom.price * Number(nights),
     });
-    toast.success(`${guest.name} assigned to Room ${assignRoom.id}.`);
+    toast.success(
+      `Booking confirmed for ${guest.name} in Room ${assignRoom.id}.`
+    );
     setAssignOpen(false);
   }
 
@@ -245,7 +247,7 @@ async function handleDelete(id) {
           )}
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
-            <Button type="submit">Confirm & Check In</Button>
+            <Button type="submit">Confirm Booking</Button>
           </div>
         </form>
       </Modal>

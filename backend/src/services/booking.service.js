@@ -98,6 +98,27 @@ async function updateBooking(id, data) {
 
   if (!existing) return null;
 
+  // Handle actual check-in time and checkout calculation
+  let actualCheckIn = existing.checkIn;
+  let actualCheckOut = existing.checkOut;
+
+  if (data.status === "Checked-In") {
+    // Calculate the original stay duration
+    const oldCheckIn = new Date(existing.checkIn);
+    const oldCheckOut = new Date(existing.checkOut);
+
+    const stayDuration =
+      oldCheckOut.getTime() - oldCheckIn.getTime();
+
+    // Guest's actual check-in time
+    actualCheckIn = new Date();
+
+    // Checkout time = actual check-in + original stay duration
+    actualCheckOut = new Date(
+      actualCheckIn.getTime() + stayDuration
+    );
+  }
+
   const booking = await prisma.booking.update({
     where: {
       bookingCode: id,
@@ -107,10 +128,20 @@ async function updateBooking(id, data) {
         data.status === "Checked-In"
           ? "CHECKED_IN"
           : data.status === "Checked-Out"
-          ? "CHECKED_OUT"
-          : data.status === "Cancelled"
-          ? "CANCELLED"
-          : "CONFIRMED",
+            ? "CHECKED_OUT"
+            : data.status === "Cancelled"
+              ? "CANCELLED"
+              : "CONFIRMED",
+
+      checkIn:
+        data.status === "Checked-In"
+          ? actualCheckIn
+          : existing.checkIn,
+
+      checkOut:
+        data.status === "Checked-In"
+          ? actualCheckOut
+          : existing.checkOut,
 
       total:
         data.total !== undefined
